@@ -1,0 +1,30 @@
+--- 
+  - name: install packages
+    apt: 
+      name: 
+        - ca-certificates
+        - lsb-release
+        - curl
+        - python3
+      state: present
+      update_cache: true
+      
+  - name: Add Example GPG key
+    get_url:
+      url: https://angie.software/keys/angie-signing.gpg
+      dest: /etc/apt/trusted.gpg.d/angie-signing.gpg
+      mode: '0644'
+      force: true      
+      
+  - name: Add Example repo
+    apt_repository:
+      filename: angie.list
+      repo: 'deb https://download.angie.software/angie/debian/12 bookworm main'
+
+  - name: install angie
+    apt: 
+      name: 
+        - angie
+      state: present
+      update_cache: true
+

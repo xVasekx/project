@@ -1,0 +1,17 @@
+---
+  - import_tasks: install.yml
+    tags: install
+
+  - import_tasks: config.yml
+    tags: config
+    
+  - import_tasks: secure.yml
+    tags: secure
+
+  - import_tasks: database_master.yml
+    tags: database_master
+    when: ansible_hostname == "masterdb"   
+  
+  - import_tasks: database_slave.yml
+    tags: database_slave
+    when: ansible_hostname == "slavedb"   

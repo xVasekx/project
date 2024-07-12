@@ -1,0 +1,8 @@
+---
+# tasks file for install_angie
+
+- import_tasks: install.yml
+  tags: install
+
+- import_tasks: secure.yml
+  tags: secure   

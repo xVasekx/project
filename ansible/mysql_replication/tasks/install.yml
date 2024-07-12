@@ -1,0 +1,44 @@
+---
+
+  - name: "Install package python"
+    apt:
+      name:
+        - python3-pymysql
+        - python3-mysqldb
+      update_cache: yes
+
+  - name: Download deb package
+    get_url:
+      url: https://repo.percona.com/apt/percona-release_latest.bookworm_all.deb
+      dest: /tmp/percona-release_latest.bookworm_all.deb
+
+  - name: install deb package
+    apt:
+      deb: /tmp/percona-release_latest.bookworm_all.deb
+
+  - name: "Update apt cache"
+    apt:
+      update_cache: yes
+
+  - name: Enable the Percona Server 8.0
+    shell: sudo percona-release setup ps80
+
+  - name: Install percona-server
+    apt:
+      name:
+        - percona-server-server
+        - percona-toolkit
+        - percona-xtrabackup-80
+      state: present
+      update_cache: true
+
+  - name: install base tools
+    apt:
+      name:
+        - vim
+        - telnet
+        - acl
+      state: present
+      update_cache: true
+
+

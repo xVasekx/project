@@ -1,0 +1,8 @@
+---
+# defaults file for install_zabbix
+mysql_root_password: 'passw0rd'
+
+mysql_user: 'zabbix'
+mysql_user_password: 'zabbix'
+mysql_db: 'zabbix'
+

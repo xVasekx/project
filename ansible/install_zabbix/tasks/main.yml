@@ -1,0 +1,40 @@
+---
+  - name: "Install package zabbix"
+    apt:
+      name:
+        - zabbix-server-mysql
+        - zabbix-frontend-php
+        - zabbix-nginx-conf
+        - zabbix-sql-scripts
+      update_cache: yes
+
+  - import_tasks: percona.yml        
+
+  - name: Copy zabbix_server.conf
+    template:
+      src: zabbix_server.conf.j2
+      dest: /etc/zabbix/zabbix_server.conf 
+
+  - name: Copy nginx.conf
+    template:
+      src: nginx.conf.j2
+      dest: /etc/zabbix/nginx.conf 
+
+  - name: Copy nginx.conf
+    template:
+      src: zabbix.conf.php.j2
+      dest: /etc/zabbix/zabbix.conf.php 
+
+  - name: Delete default nginx vhost symlink
+    file: path=/etc/nginx/sites-enabled/default state=absent
+
+  - name: Enable and start service
+    service:
+      name: "{{ item }}"
+      state: restarted
+      enabled: true        
+    with_items:
+        - zabbix-server
+        - nginx
+        - php8.2-fpm
+

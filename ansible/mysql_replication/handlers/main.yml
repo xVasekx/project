@@ -1,0 +1,5 @@
+---
+# handlers file for mysql_replication
+#
+- name: "Restart percona"
+  service: "name=mysql state=restarted"

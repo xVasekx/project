@@ -1,0 +1,93 @@
+---
+- name: install packages
+  hosts: all
+  become: yes
+  tasks:
+    - name: Download deb package
+      get_url:
+        url:  https://repo.zabbix.com/zabbix/6.4/debian/pool/main/z/zabbix-release/zabbix-release_6.4-1+debian12_all.deb     
+        dest: /tmp/zabbix-release_6.4-1+debian12_all.deb
+  
+    - name: install deb package
+      apt:
+        deb: /tmp/zabbix-release_6.4-1+debian12_all.deb
+
+    - name: "Update apt cache"
+      apt:
+        update_cache: yes
+
+    - name: install packages
+      apt:
+        name:
+          - zabbix-agent
+          - rsyslog
+        update_cache: yes
+
+    - name: copy zabbix_agentd.conf
+      template:
+        src: install_zabbix/templates/zabbix_agentd.conf.j2
+        dest: /etc/zabbix/zabbix_agentd.conf
+
+    - name: copy rsyslog.conf
+      template:
+        src: install_rsyslog/templates/rsyslog.conf.j2
+        dest: /etc/rsyslog.conf
+
+    - name: copy all_log.conf
+      template:
+        src: install_rsyslog/files/all_logs.conf
+        dest: /etc/rsyslog.d/all_logs.conf
+
+
+    - name: Enable and start service
+      service:
+        name: "{{ item }}" 
+        state: restarted
+        enabled: true
+      with_items:
+        - 'zabbix-agent'
+        - 'rsyslog'
+
+  tags: all_servers
+
+- name: install angie
+  hosts: websrv
+  become: yes
+  roles:
+    - install_angie
+  tags:
+    - install_angie
+    
+- name: install percona 
+  hosts: db
+  become: yes
+  roles:  
+    - mysql_replication
+  tags:
+    - database
+
+- name: install wordpress 
+  hosts: masterdb
+  become: yes
+  roles:  
+    - install_wordpress
+  tags:
+    - wordpress
+
+- name: install zabbix 
+  hosts: zabbixsrv
+  become: yes
+  roles:  
+    - install_zabbix
+  tags:
+    - zabbix
+
+- name: install rsyslog
+  hosts: logsrv
+  become: yes
+  roles:  
+    - install_rsyslog
+  tags:
+    - rsyslog
+
+

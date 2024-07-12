@@ -1,0 +1,5 @@
+---
+# handlers file for install_angie
+
+- name: "Reload angie"
+  service: "name=angie state=reloaded"

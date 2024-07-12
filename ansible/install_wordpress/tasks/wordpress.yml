@@ -1,0 +1,55 @@
+---
+    - name: creating database
+      mysql_db:
+        name: "{{ db_name }}"
+        state: "present"
+        login_user: "root"
+        login_password: "{{ mysql_root_password }}"
+        
+    - name: creating database user
+      mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        priv: "{{ db_name }}.*:ALL"
+        state: "present"
+        login_user: "root"
+        login_password: "{{ mysql_root_password }}"
+     
+    - name: download WordPress
+      get_url:
+        url: "{{ download_url }}"
+        dest: "/tmp/latest.tar.gz"
+    
+    - name: creating directory for WordPress
+      file:
+        path: "{{ wpdirectory }}"
+        state: "directory"
+        owner: "www-data"
+        group: "www-data"
+        
+    - name: unpack WordPress installation
+      shell: "tar xvfz /tmp/latest.tar.gz -C {{ wpdirectory }} && chown -R www-data:www-data {{ wpdirectory }}"
+      
+    - name: copy wp-config.php
+      template:
+        src: wp-config-sample.php.j2
+        dest: '{{ wpdirectory }}/wordpress/wp-config.php'
+        owner: www-data
+        group: www-data
+        mode: '0775'
+        
+    - name: copy wordpress.conf
+      template:
+        src: wordpress.conf.j2
+        dest: /etc/apache2/sites-available/000-default.conf
+        owner: www-data
+        group: www-data
+        mode: '0775'
+        
+    - name: unpack WordPress installation
+      shell: " a2enmod rewrite"
+      
+    - name: restart apache2
+      service: 
+        name: apache2
+        state: restarted

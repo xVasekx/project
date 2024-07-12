@@ -1,0 +1,17 @@
+---
+      
+#  - name: Parse password mysqld.log
+#    shell: "cat /var/log/mysqld.log | sed -n 's/.*temporary password is generated for root@localhost: //p' | tail -n1"
+#    #shell: "cat /var/log/mysqld.log | grep 'root@localhost:' | awk '{print $11}'"
+#    register: temppass
+   
+  - name: "Set the root password"
+    mysql_user:
+      name: root
+      host: localhost
+      password: "{{ mysql_root_password }}"
+      check_implicit_admin: yes
+      state: present
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+
+

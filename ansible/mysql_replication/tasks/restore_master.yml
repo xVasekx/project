@@ -1,0 +1,31 @@
+---
+- hosts: db
+  become: yes
+  tasks:
+  - name: Dump all databases to slave.sql
+    mysql_db:
+      state: dump
+      name: wordpress
+      target: slave.sql 
+    when: ansible_hostname == "slavedb"
+
+  - name: Copy dump
+    fetch:
+       src: slave.sql
+       dest: slave.sql
+       flat: true
+    when: ansible_hostname == "slavedb"
+
+  - name: Copy dump database
+    copy:
+      src: slave.sql
+      dest: slave.sql
+    when: ansible_hostname == "masterdb"
+
+  - name: Restore database 'slave.sql'
+    mysql_db:
+      name: wordpress
+      state: import
+      target: slave.sql
+    when: ansible_hostname == "masterdb"
+

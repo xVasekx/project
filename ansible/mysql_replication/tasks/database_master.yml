@@ -1,0 +1,25 @@
+---
+
+  - name: Specify grants composed of more than one word
+    mysql_user:
+      name: "{{ mysql_replication_user }}"
+      host: "%"
+      password: "{{ mysql_replication_password }}"
+      priv: '*.*:REPLICATION SLAVE,REPLICATION CLIENT'
+      state: present
+      
+  - name: Dump all databases to master.sql
+    mysql_db:
+      state: dump
+      name: all
+      target: master.sql
+      ignore_tables:
+        - bet.events_on_demand
+        - bet.v_same_event
+        
+  - name: Copy dump
+    fetch:
+       src: master.sql
+       dest: mysql_replication/files/master.sql
+       flat: true
+    

@@ -1,0 +1,93 @@
+---
+
+  - name: "Install package python"
+    apt:
+      name:
+        - python3-pymysql
+        - python3-mysqldb
+      update_cache: yes
+
+  - name: Download deb package
+    get_url:
+      url: https://repo.percona.com/apt/percona-release_latest.bookworm_all.deb
+      dest: /tmp/percona-release_latest.bookworm_all.deb
+
+  - name: install deb package
+    apt:
+      deb: /tmp/percona-release_latest.bookworm_all.deb
+
+  - name: "Update apt cache"
+    apt:
+      update_cache: yes
+
+  - name: Enable the Percona Server 8.0
+    shell: sudo percona-release setup ps80
+
+  - name: Install percona-server
+    apt:
+      name:
+        - percona-server-server
+        - percona-toolkit
+        - percona-xtrabackup-80
+      state: present
+      update_cache: true
+
+  - name: "Set the root password"
+    mysql_user:
+      name: root
+      host: localhost
+      password: "{{ mysql_root_password }}"
+      check_implicit_admin: yes
+      state: present
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+    ignore_errors: true
+
+  - name: Copy root .my.cnf
+    template:
+      src: root-my-cnf.j2
+      dest: /root/.my.cnf
+      owner: root
+      group: root
+      mode: '0600'  
+
+  - name: Create database zabbix
+    mysql_db:
+      name:
+        - '{{ mysql_db }}'
+      encoding: utf8
+      collation: utf8_bin
+      state: present
+
+  - name: Specify grants composed of more than one word
+    mysql_user:
+      name: "{{ mysql_user }}"
+      password: "{{ mysql_user_password }}"
+      priv: '{{ mysql_db }}.*: ALL,GRANT'
+      state: present
+
+  - name: Set log_bin_trust_function_creators variable to 1 persistently
+    mysql_variables:
+      variable: log_bin_trust_function_creators
+      value: 1
+      mode: persist       
+
+  - name: Copy server sql schema
+    copy:
+      src: server.sql
+      dest: /tmp/server.sql
+
+  - name: Restore database
+    mysql_db:
+      name: zabbix
+      state: import
+      target: /tmp/server.sql
+    ignore_errors: true
+
+
+  - name: Set log_bin_trust_function_creators variable to 0 persistently
+    mysql_variables:
+      variable: log_bin_trust_function_creators
+      value: 0
+      mode: persist        
+
+       

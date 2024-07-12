@@ -1,0 +1,11 @@
+---
+# tasks file for install_rsyslog
+
+  - name: "Install package"
+    apt:
+      name:
+        - nginx
+        - 
+      update_cache: yes
+
+

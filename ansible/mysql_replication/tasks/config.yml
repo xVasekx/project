@@ -1,0 +1,23 @@
+---
+  - name: Copy root .my.cnf
+    template:
+      src: root-my-cnf.j2
+      dest: /root/.my.cnf
+      owner: root
+      group: root
+      mode: '0600'  
+ 
+  - name: Copy etc my.cnf
+    template:
+      src: etc_mysql_my.cnf.j2
+      dest: /etc/mysql/my.cnf
+      owner: root
+      group: root
+      mode: '0644'  
+    notify: 
+      - Restart percona
+
+  - name: Enable and start service
+    service:
+      name: mysql
+      state: restarted

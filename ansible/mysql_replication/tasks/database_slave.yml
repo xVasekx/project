@@ -1,0 +1,15 @@
+---
+  - name: Configure replication on the replica
+    mysql_replication:
+      mode: changeprimary
+      primary_host: "{{ mysql_replication_primary }}"
+      primary_user: "{{ mysql_replication_user }}"
+      primary_password: "{{ mysql_replication_password }}"
+      primary_auto_position: "1"
+    register: replica
+
+  - name: Start replication.
+    mysql_replication:
+      mode: startreplica
+    when:
+      - replica.changed
